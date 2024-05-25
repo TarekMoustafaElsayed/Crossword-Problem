@@ -4,23 +4,13 @@
 #include <algorithm>
 using namespace std;
 
-bool canplaceH(char crossword[10][10] , string current ,int i , int j ) {
+bool canplaceH(char crossword[10][10], string current, int i, int j) {
+    int crosswordSizeRows = 10;
 
-    int rows = sizeof(crossword)/sizeof(crossword[0]);
-    int cols = sizeof(crossword[0])/sizeof(crossword[0][0]);
-    int crosswordSizeRows = rows;
-
-    if (j - 1 >= 0 && crossword[i][j - 1] != '+') return false;
-
-    if (j + current.length() < crosswordSizeRows && crossword[i][j + current.length()] != '+') return false;
+    if (j + current.length() > crosswordSizeRows) return false;
 
     for (int x = 0; x < current.length(); x++) {
-        if (x + j >= crosswordSizeRows) return false;
-
-        if (crossword[i][x + j] == '-' || crossword[i][x + j] == current.at(x)) {
-            continue;
-        }
-        else {
+        if (crossword[i][j + x] != '-' && crossword[i][j + x] != current[x]) {
             return false;
         }
     }
@@ -29,26 +19,19 @@ bool canplaceH(char crossword[10][10] , string current ,int i , int j ) {
 }
 
 bool canplaceV(char crossword[10][10], string current, int i, int j) {
+    int crosswordSizeCols = 10;
 
-    int crosswordSizeColumns = sizeof(crossword[0]) / sizeof(crossword[0][0]);
-
-    if (i - 1 >= 0 && crossword[i - 1][j] != '+') return false;
-
-    if (i + current.length() < crosswordSizeColumns && crossword[i + current.length()][j] != 'x') return false;
+    if (i + current.length() > crosswordSizeCols) return false;
 
     for (int x = 0; x < current.length(); x++) {
-        if (x + i >= crosswordSizeColumns) return false;
-
-        if (crossword[i + x][j] == '-' || crossword[i + x][j] == current.at(x)) {
-            continue;
-        }
-        else {
+        if (crossword[i + x][j] != '-' && crossword[i + x][j] != current[x]) {
             return false;
         }
     }
 
     return true;
 }
+
 
 bool* placeH(char crossword[10][10], string current, int i, int j) {
 
@@ -57,7 +40,7 @@ bool* placeH(char crossword[10][10], string current, int i, int j) {
     for (int k = 0; k < current.length(); k++) {
         if (crossword[i][j + k] == '-') {
             res[k] = true;
-            crossword[i][j + k] = current.at(k);
+            crossword[i][j + k] = current[k];
         }
         else {
             res[k] = false;
@@ -74,7 +57,7 @@ bool* placeV(char crossword[10][10], string current, int i, int j) {
     for (int k = 0; k < current.length(); k++) {
         if (crossword[i+k][j] == '-') {
             res[k] = true;
-            crossword[i+k][j] = current.at(k);
+            crossword[i+k][j] = current[k];
         }
         else { 
             res[k] = false; 
@@ -84,41 +67,50 @@ bool* placeV(char crossword[10][10], string current, int i, int j) {
     return res;
 }
 
-void unplaceH(char crossword[10][10], bool arr[], int i, int j) {
+void unplaceH(char crossword[10][10], bool arr[], int i, int j , int len) {
 
-    int arrSize = sizeof(arr) / sizeof(bool);
-
-    for (int k = 0; k < arrSize; k++) {
+    for (int k = 0; k < len ; k++) {
         if (arr[k]) {
             crossword[i][j + k] = '-';
         }
     }
+
+    delete[] arr;
 }
 
-void unplaceV(char crossword[10][10], bool arr[], int i, int j) {
+void unplaceV(char crossword[10][10], bool arr[], int i, int j , int len) {
 
-    int arrSize = sizeof(arr) / sizeof(arr[0]);
-
-    for (int k = 0; k < arrSize; k++) {
+    for (int k = 0; k < len; k++) {
         if (arr[k]) {
             crossword[i+k][j] = '-';
         }
     }
+
+    delete[] arr;
 }
 
-void solveCrossword(char crossword[10][10], vector<string> words, int index) {
+
+void printCrossword(char crossword[10][10]) {
+    for (int i = 0; i < 10; i++) {
+        for (int j = 0; j < 10; j++) {
+            cout << crossword[i][j] << " ";
+        }
+        cout << endl;
+    }
+}
+
+bool solveCrossword(char crossword[10][10], vector<string> words, int index) {
 
     if (index == words.size()) {
-        cout << crossword;
-        return;
+        printCrossword(crossword);
+        return true;
     }
 
     string current = words[index];
- int rows = sizeof(crossword)/sizeof(crossword[0]);
-    int cols = sizeof(crossword[0])/sizeof(crossword[0][0]);
-    int crosswordSizeRows = rows;
 
-    int crosswordSizeColumns = cols;
+    int crosswordSizeRows = 10;
+
+    int crosswordSizeColumns = 10;
 
     for (int i = 0; i < crosswordSizeRows ; i++) {
 
@@ -128,49 +120,74 @@ void solveCrossword(char crossword[10][10], vector<string> words, int index) {
                 if (canplaceH(crossword, current, i, j) == true) {
 
                     bool* wePlaced = placeH(crossword, current, i, j);
-                    solveCrossword(crossword, words, index + 1);
-                    unplaceH(crossword, wePlaced, i, j);
-                    delete[] wePlaced;
+                    if (solveCrossword(crossword, words, index + 1)) {
+                        delete[] wePlaced;
+                        return true;
+                    }
+                    unplaceH(crossword, wePlaced, i, j, current.length());
                 }
 
                 if (canplaceV(crossword, current, i, j) == true) {
 
                     bool* wePlaced = placeV(crossword, current, i, j);
-                    solveCrossword(crossword, words, index + 1);
-                    unplaceV(crossword, wePlaced, i, j);
-                    delete[] wePlaced;
+                    if (solveCrossword(crossword, words, index + 1)) {
+                        delete[] wePlaced;
+                        return true;
+                    }
+                    unplaceV(crossword, wePlaced, i, j, current.length());
                 }
             }
         }
 
     }
+
+    return false;
 }
 
 int main()
 {
-    cout<<"running";
-    const auto size =10;
-vector<string> words = {"DELHI","ICELAND","ANKARA","LONDON"};
-char matrix1[size][size] = {
+    cout << "running" << endl;
+
+    vector<string> words = { "DELHI", "ICELAND", "ANKARA", "LONDON" };
+    char crossword[10][10] = {
+        {'+', '-', '+', '+', '+', '+', '+', '+', '+', '+'},
+        {'+', '-', '+', '+', '+', '+', '+', '+', '+', '+'},
+        {'+', '-', '+', '+', '+', '+', '+', '+', '+', '+'},
+        {'+', '-', '-', '-', '-', '-', '+', '+', '+', '+'},
+        {'+', '-', '+', '+', '+', '-', '+', '+', '+', '+'},
+        {'+', '-', '+', '+', '+', '-', '+', '+', '+', '+'},
+        {'+', '-', '+', '+', '+', '-', '+', '+', '+', '+'},
+        {'+', '+', '-', '-', '-', '-', '-', '-', '+', '+'},
+        {'+', '+', '+', '+', '+', '-', '+', '+', '+', '+'},
+        {'+', '+', '+', '+', '+', '-', '+', '+', '+', '+'}
+    };
+
+    vector<string> words2 = { "PUNJAB","JHARKHAND","MIZORAM","MUMBAI" };
+    char crossword2[10][10] = {
 
 {'+' ,'-' ,'+', '+','+','+' ,'+' ,'+', '+','+'}, //1
 {'+' ,'-' ,'+', '+','+','+' ,'+' ,'+', '+','+'}, //2
-{'+' ,'-' ,'+', '+','+','+' ,'+' ,'+', '+','+'}, //3
-{'+' ,'-' ,'-', '-','-','-' ,'+' ,'+', '+','+'}, //4
-{'+' ,'-' ,'+', '+','+','-' ,'+' ,'+', '+','+'}, //5
-{'+' ,'-' ,'+', '+','+','-' ,'+' ,'+', '+','+'}, //6
-{'+' ,'-' ,'+', '+','+','-' ,'+' ,'+', '+','+'}, //7
-{'+' ,'+' ,'-', '-','-','-' ,'-' ,'-', '+','+'}, //8
-{'+' ,'-' ,'+', '+','+','-' ,'+' ,'+', '+','+'}, //9
-{'+' ,'-' ,'+', '+','+','-' ,'+' ,'+', '+','+'}, //10
+{'+' ,'-' ,'+', '+','+','+' ,'-' ,'+', '+','+'}, //3
+{'+' ,'-' ,'-', '+','+','+' ,'-' ,'-', '+','+'}, //4
+{'+' ,'-' ,'+', '+','+','+' ,'-' ,'+', '+','+'}, //5
+{'+' ,'-' ,'+', '+','+','+' ,'-' ,'+', '+','+'}, //6
+{'+' ,'-' ,'+', '+','+','+' ,'-' ,'+', '+','+'}, //7
+{'+' ,'-' ,'+', '-','-','-' ,'-' ,'-', '-','+'}, //8
+{'+' ,'-' ,'+', '+','+','+' ,'+' ,'+', '+','+'}, //9
+{'+' ,'+' ,'+', '-','-','-' ,'-' ,'-', '-','-'}, //10
 
-};
+    };
 
+    if (!solveCrossword(crossword, words, 0)) {
+        cout << "No solution found." << endl;
+    }
 
-solveCrossword(matrix1,words,0);
+    cout << endl;
 
+    if (!solveCrossword(crossword2, words2, 0)) {
+        cout << "No solution found." << endl;
+    }
 
-
-// vector<vector<char>> matrix2 = {{},{},{},{},{},{},{},{},{},{}};
+    return 0;
 
 }
