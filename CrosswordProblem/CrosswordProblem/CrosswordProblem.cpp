@@ -6,7 +6,9 @@ using namespace std;
 
 bool canplaceH(char crossword[10][10] , string current ,int i , int j ) {
 
-    int crosswordSizeRows = sizeof(crossword) / sizeof(crossword[0]);
+    int rows = sizeof(crossword)/sizeof(crossword[0]);
+    int cols = sizeof(crossword[0])/sizeof(crossword[0][0]);
+    int crosswordSizeRows = rows;
 
     if (j - 1 >= 0 && crossword[i][j - 1] != '+') return false;
 
@@ -84,7 +86,7 @@ bool* placeV(char crossword[10][10], string current, int i, int j) {
 
 void unplaceH(char crossword[10][10], bool arr[], int i, int j) {
 
-    int arrSize = sizeof(arr) / sizeof(arr[0]);
+    int arrSize = sizeof(arr) / sizeof(bool);
 
     for (int k = 0; k < arrSize; k++) {
         if (arr[k]) {
@@ -112,10 +114,11 @@ void solveCrossword(char crossword[10][10], vector<string> words, int index) {
     }
 
     string current = words[index];
+ int rows = sizeof(crossword)/sizeof(crossword[0]);
+    int cols = sizeof(crossword[0])/sizeof(crossword[0][0]);
+    int crosswordSizeRows = rows;
 
-    int crosswordSizeRows = sizeof(crossword) / sizeof(crossword[0]);
-
-    int crosswordSizeColumns = sizeof(crossword[0]) / sizeof(crossword[0][0]);
+    int crosswordSizeColumns = cols;
 
     for (int i = 0; i < crosswordSizeRows ; i++) {
 
@@ -145,4 +148,29 @@ void solveCrossword(char crossword[10][10], vector<string> words, int index) {
 
 int main()
 {
+    cout<<"running";
+    const auto size =10;
+vector<string> words = {"DELHI","ICELAND","ANKARA","LONDON"};
+char matrix1[size][size] = {
+
+{'+' ,'-' ,'+', '+','+','+' ,'+' ,'+', '+','+'}, //1
+{'+' ,'-' ,'+', '+','+','+' ,'+' ,'+', '+','+'}, //2
+{'+' ,'-' ,'+', '+','+','+' ,'+' ,'+', '+','+'}, //3
+{'+' ,'-' ,'-', '-','-','-' ,'+' ,'+', '+','+'}, //4
+{'+' ,'-' ,'+', '+','+','-' ,'+' ,'+', '+','+'}, //5
+{'+' ,'-' ,'+', '+','+','-' ,'+' ,'+', '+','+'}, //6
+{'+' ,'-' ,'+', '+','+','-' ,'+' ,'+', '+','+'}, //7
+{'+' ,'+' ,'-', '-','-','-' ,'-' ,'-', '+','+'}, //8
+{'+' ,'-' ,'+', '+','+','-' ,'+' ,'+', '+','+'}, //9
+{'+' ,'-' ,'+', '+','+','-' ,'+' ,'+', '+','+'}, //10
+
+};
+
+
+solveCrossword(matrix1,words,0);
+
+
+
+// vector<vector<char>> matrix2 = {{},{},{},{},{},{},{},{},{},{}};
+
 }
